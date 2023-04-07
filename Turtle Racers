@@ -1,0 +1,176 @@
+import turtle
+import time
+import random
+
+STARTING_BET = 1000
+
+WIDTH, HEIGHT = 500, 500
+COLORS = ['red', 'green', 'blue', 'orange', 'yellow', 'black', 'pink', 'brown', 'cyan']         # Main List
+COLORS_TWO = ['red', 'green', 'blue', 'orange', 'yellow', 'black', 'pink', 'brown', 'cyan']     # Copied List
+
+
+def color_choice():     # Obtains user's desired color from the displayed list
+    while True:
+        color = input("Which color turtle would you like to race? ")
+        if color.lower() == 'red':
+            break
+        elif color.lower() == 'green':
+            break
+        elif color.lower() == 'blue':
+            break
+        elif color.lower() == 'orange':
+            break
+        elif color.lower() == 'yellow':
+            break
+        elif color.lower() == 'black':
+            break
+        elif color.lower() == 'pink':
+            break
+        elif color.lower() == 'brown':
+            break
+        elif color.lower() == 'cyan':
+            break
+        else:
+            print("Please input a color.")
+    return color.lower()
+
+
+def get_number_of_racers():     # Obtains the desired nuber of racers the user wants to race against (1-8)
+    racers = 0
+    while True:
+        racers = input('Enter the number of racers you would like to race (1-8): ')
+        if racers.isdigit():
+            racers = int(racers)
+        else:
+            print('Please enter a number. Try again!')
+            continue
+        if 1 <= racers <= 8:
+            return racers
+        else:
+            print('Number not in range 1-8. Try again!')
+
+
+def deposit():      # Obtains the users desired bet within 1-100
+    bet = 0
+    while True:
+        bet = input("How much would you like to bet $1-100: $")
+        if bet.isdigit():
+            bet = int(bet)
+        else:
+            print('Please enter a number.')
+            continue
+        if 1 <= bet <= 100:
+            return bet
+        else:
+            print('Number not in range 1-100.')
+
+
+def race(colors, pc):                           # Sets up and runs th race, and returns the winner
+    turtles = create_turtles(colors, pc)        # Creates turtles from new list and from the user's turtle choice
+    colors.insert(0, pc)                        # Puts the user's color back into list in the first slot, to make like of colors racing
+    while True:
+        for racer in turtles:                   # Loop sets distance turtles will travel randomly between 1 and 20
+            distance = random.randrange(1, 20)
+            racer.forward(distance)
+
+            x, y = racer.pos()                  # Checks position of racer
+            if y >= HEIGHT // 2 - 10:           # Sets the "finish line" for the turtles
+                return colors[turtles.index(racer)]     # Returns the winning turtle's color
+
+
+def create_turtles(colors, pc):            # function will take in colors from list as well as chosen color for racer
+    turtles = []                           # making new list for the racers being used
+    spacingx = WIDTH // (len(colors) + 2)  # setting the spacing between racers based on number of racers
+    racer = turtle.Turtle()                # creates a turtle image within Turtle
+    racer.color(pc)
+    racer.shape('turtle')
+    racer.left(90)
+    racer.penup()
+    racer.setpos(-WIDTH // 2 + (1) * spacingx, -HEIGHT // 2 + 20)       # Setting position of racer based on number of racers
+    racer.pendown()
+    turtles.append(racer)
+    for i, color in enumerate(colors):          # Creates index and order of colors/users color in "turtles" list
+        racer = turtle.Turtle()                 # Making other racers in the loop, up to the number selected in get_number_of_racers()
+        racer.color(color)                      # Set graphics colo based on Master colors list
+        racer.shape('turtle')
+        racer.left(90)
+        racer.penup()
+        racer.setpos(-WIDTH//2 + (i + 2) *spacingx, -HEIGHT // 2 + 20)
+        racer.pendown()
+        turtles.append(racer)
+
+    return turtles  #
+
+
+def init_turtle():
+    screen = turtle.Screen()
+    screen.setup(WIDTH, HEIGHT)
+    screen.title('Turtle Racing!')   
+
+
+def main():
+    initial_dep = 1000
+    print("Welcome to the turtle racing game!")
+    print(f"Your starting balance is ${initial_dep}")
+    while True:
+        while True:
+            bet = deposit()
+            if bet > initial_dep:
+                print("You do not have enough funds to make that bet.")
+            else:
+                break
+        racers = get_number_of_racers()
+        print(f"{COLORS}")
+        colors_c = color_choice()           # User's desired color
+        COLORS.remove(colors_c)             # Removing user's color from master list
+        b_colors = COLORS                   # Making master list
+        a_colors = COLORS_TWO               # Making "copied" list
+
+        init_turtle()                       # Creating Turtle screen
+
+        random.shuffle(b_colors)            # Shuffling colors in Master list
+        colors = b_colors[:racers]          # Creates new list of racers based off of the chosen amount of racers the user wants
+        print("---------RACING---------")
+        winner = race(colors, colors_c)     # Running the race with the list of colors and the user's color while returning the winner
+        print(f"The winner is the turtle with color: {winner}")
+        time.sleep(3)                       # Race pauses for 3 seconds following the race
+        turtle.clearscreen()                # Screen is erased of all drawings in graphics window
+        turtle.resetscreen()                # Moves turtles back to original position in graphics screen
+
+        b_colors.clear()                    # Clears b_colored list, so it can be reset in next step
+        b_colors.extend(a_colors)           # Copying "copied" list into the master list which rests the list
+        if winner == colors_c:
+            print("Congratulations! You are a winner.")
+            new_total = bet * racers                # Balance = bet multiplied by betting odds
+            initial_dep += new_total                # Winnings added to original balance
+            print(f"You now have ${initial_dep}")
+
+        elif winner != colors_c:
+            print("Sorry, you lost.")
+            new_total = bet
+            initial_dep -= new_total                # Loss subtracted from original balance
+            print(f"You now have ${initial_dep}")
+            if initial_dep == 0:                    # Having a lack of money in balance ends the game
+                print("You have no more money.")
+                break
+
+        print("Do you want to continue playing?")                   # Following steps determines if the user quits or continues game
+        answer = input("Press [Enter] to play or [Q] to quit. ")
+        if answer.upper() == "Q":
+            print("Okay maybe another time.")
+            if STARTING_BET < initial_dep:                          # Calculates money gained
+                final_count = initial_dep - STARTING_BET
+                print(f"Congratulations, You went +${final_count}.")
+                break
+            elif STARTING_BET > initial_dep:                        # Calculates money lost
+                final_count = STARTING_BET - initial_dep
+                print(f"Sorry, You went -${final_count}.")
+                break
+            else:
+                print(f"You broke even.")
+                break
+        else:
+            continue
+    return 0
+
+main()
